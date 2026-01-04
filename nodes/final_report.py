@@ -20,7 +20,7 @@ def final_report(state: IncidentState) -> IncidentState:
 
         "event": state["event"],
 
-        "classification": state["context"].get("classification"),
+        "classification": state.get("classification"),
 
         "evidence_collected": [
             e.get("type") for e in state.get("evidence", [])

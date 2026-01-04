@@ -39,7 +39,9 @@ with tab1:
         for incident in pending:
             inc_id = incident['incident_id']
             # Align with ingest.py state: use 'object_ref' instead of 'object'
-            obj = incident.get('object_ref', {})
+            event = incident.get("event", {})
+            obj = event.get("object", {})
+
             
             with st.container(border=True):
                 # Header Row

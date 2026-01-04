@@ -2,12 +2,10 @@
 from state import IncidentState
 
 def decision_router(state):
-    human = state.get("human_decision")
+    if state.get("status") != "WAITING_FOR_HUMAN":
+        return "evidence_collector"
 
-    # If no decision object exists, or if the internal decision is empty, STOP.
-    if not human or not human.get("decision"):
-        return "__end__"  # This stops the recursion
-
+    human = state.get("human_decision", {})
     decision = human.get("decision")
 
     if decision == "approve":

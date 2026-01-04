@@ -1,3 +1,4 @@
+#nodes/event_interpreter.py
 from state import IncidentState
 from llm.llm_utils import invoke_json
 
@@ -22,5 +23,5 @@ Respond ONLY in JSON:
 
     classification = invoke_json(llm, prompt)
 
-    state["context"]["classification"] = classification
+    state["classification"] = classification
     return state

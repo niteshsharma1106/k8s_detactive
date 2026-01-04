@@ -21,18 +21,21 @@ def ingest_event(payload: dict):
         "namespace": payload["namespace"],
         "object_ref": payload["object"],
         "event": payload,
-        "context": {},
+
+        "classification": None,
         "evidence": [],
         "hypotheses": [],
         "root_cause": None,
         "action_plan": [],
+
         "human_decision": None,
+        "final_report": None,
         "status": "INVESTIGATING",
-    }
+        }
+
+
 
     save_state(state)
-
-    # Start graph execution
     result = graph.invoke(state)
     save_state(result)
 

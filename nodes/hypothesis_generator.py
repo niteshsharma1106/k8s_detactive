@@ -11,7 +11,7 @@ Based on the incident classification and evidence summary below,
 generate plausible hypotheses.
 
 Classification:
-{state['context'].get('classification')}
+{state.get('classification')}
 
 Evidence Summary:
 {state['evidence']}
