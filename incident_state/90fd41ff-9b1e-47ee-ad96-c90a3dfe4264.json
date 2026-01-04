@@ -1,0 +1,263 @@
+{
+  "incident_id": "90fd41ff-9b1e-47ee-ad96-c90a3dfe4264",
+  "cluster": "acmclus01",
+  "platform": "openshift",
+  "namespace": "default",
+  "object_ref": {
+    "kind": "Pod",
+    "name": "example-pod-v2"
+  },
+  "event": {
+    "cluster": "acmclus01",
+    "platform": "openshift",
+    "namespace": "default",
+    "object": {
+      "kind": "Pod",
+      "name": "example-pod-v2"
+    },
+    "reason": "CrashLoopBackOff",
+    "message": "Back-off restarting failed container",
+    "source": "kubelet"
+  },
+  "context": {
+    "classification": {
+      "incident_type": "application",
+      "scope": "pod",
+      "confidence": 0.96,
+      "rationale": "CrashLoopBackOff indicates the container in the pod repeatedly fails to start, which is typically an application\u2011level problem (e.g., bug, misconfiguration, bad image) rather than a node, network, storage, or security issue. The event is reported on a specific Pod, so the scope is at the pod level."
+    },
+    "cluster": "acmclus01",
+    "platform": "openshift",
+    "namespace": "default",
+    "object": {
+      "kind": "Pod",
+      "name": "example-pod-v2"
+    },
+    "investigation_stage": "context_built"
+  },
+  "evidence": [],
+  "hypotheses": [
+    {
+      "hypothesis": "The container image is corrupted or built incorrectly, causing the application process to exit immediately on start\u2011up.",
+      "confidence": 0.85,
+      "status": "VALID",
+      "evidence": [
+        "Highest confidence (0.85) and a common cause of immediate container exits; despite no direct evidence, the score indicates it is plausible."
+      ]
+    },
+    {
+      "hypothesis": "Required environment variables or secret mounts are missing or malformed, leading to a runtime error during initialization.",
+      "confidence": 0.78,
+      "status": "VALID",
+      "evidence": [
+        "Confidence (0.78) exceeds the typical validation threshold and missing/incorrect env vars are frequent startup failures."
+      ]
+    },
+    {
+      "hypothesis": "A recent code change introduced a bug that crashes the application during its startup sequence.",
+      "confidence": 0.72,
+      "status": "VALID",
+      "evidence": [
+        "Confidence (0.72) is above the chosen cutoff; recent changes are a usual suspect for new crashes."
+      ]
+    },
+    {
+      "hypothesis": "The pod's resource limits (CPU/memory) are too low, causing the process to be OOM\u2011killed or throttled and restart repeatedly.",
+      "confidence": 0.65,
+      "status": "INVALID",
+      "evidence": [
+        "Confidence (0.65) is below the validation threshold and there is no evidence of OOM or throttling events."
+      ]
+    },
+    {
+      "hypothesis": "Liveness or startup probes are misconfigured, causing Kubernetes to kill the container before it can become ready.",
+      "confidence": 0.6,
+      "status": "INVALID",
+      "evidence": [
+        "Confidence (0.60) is low and no probe\u2011related failures are observed in the evidence."
+      ]
+    },
+    {
+      "hypothesis": "The application depends on an external service (e.g., database, API) that is unavailable, and it exits when it cannot establish the connection.",
+      "confidence": 0.55,
+      "status": "INVALID",
+      "evidence": [
+        "Confidence (0.55) is below threshold and no connectivity errors or service\u2011unavailable logs are present."
+      ]
+    },
+    {
+      "hypothesis": "A volume mount (ConfigMap, Secret, PersistentVolume) is missing or has incorrect permissions, causing the application to fail on start.",
+      "confidence": 0.5,
+      "status": "INVALID",
+      "evidence": [
+        "Confidence (0.50) is the lowest and there is no indication of mount or permission problems in the current evidence."
+      ]
+    }
+  ],
+  "root_cause": {
+    "root_cause": "The container image is corrupted or built incorrectly, causing the application process to exit immediately on start\u2011up.",
+    "confidence": 0.85,
+    "supporting_evidence": [
+      "Highest confidence (0.85) and a common cause of immediate container exits; despite no direct evidence, the score indicates it is plausible."
+    ]
+  },
+  "action_plan": [
+    {
+      "description": "Inspect the failing pod to see its current status, events, and container image reference.",
+      "command": "kubectl describe pod -n default <pod-name>",
+      "risk": "LOW"
+    },
+    {
+      "description": "Fetch the container logs (including previous instance) to capture any start\u2011up error messages before the process exits.",
+      "command": "kubectl logs -n default <pod-name> --previous || kubectl logs -n default <pod-name>",
+      "risk": "LOW"
+    },
+    {
+      "description": "Export the pod specification as YAML to verify the exact image name, tag, and imagePullPolicy being used.",
+      "command": "kubectl get pod -n default <pod-name> -o yaml > /tmp/<pod-name>.yaml",
+      "risk": "LOW"
+    },
+    {
+      "description": "Create a short\u2011lived test pod using the same image to see if it starts successfully in isolation.",
+      "command": "kubectl run test-image-check --image=<image-name>:<tag> --restart=Never --rm -i --tty --namespace=default -- /bin/sh -c \"echo 'Image test start'; sleep 10\"",
+      "risk": "MEDIUM"
+    },
+    {
+      "description": "If the image is confirmed corrupted, patch the owning Deployment (or other controller) to use a known good image tag or digest.",
+      "command": "kubectl set image deployment/<deployment-name> <container-name>=<good-image>:<good-tag> -n default",
+      "risk": "MEDIUM"
+    }
+  ],
+  "final_report": {
+    "incident_id": "90fd41ff-9b1e-47ee-ad96-c90a3dfe4264",
+    "timestamp": "2026-01-02T10:05:58.502829Z",
+    "cluster": "acmclus01",
+    "platform": "openshift",
+    "namespace": "default",
+    "object": {
+      "kind": "Pod",
+      "name": "example-pod-v2"
+    },
+    "event": {
+      "cluster": "acmclus01",
+      "platform": "openshift",
+      "namespace": "default",
+      "object": {
+        "kind": "Pod",
+        "name": "example-pod-v2"
+      },
+      "reason": "CrashLoopBackOff",
+      "message": "Back-off restarting failed container",
+      "source": "kubelet"
+    },
+    "classification": {
+      "incident_type": "application",
+      "scope": "pod",
+      "confidence": 0.96,
+      "rationale": "CrashLoopBackOff indicates the container in the pod repeatedly fails to start, which is typically an application\u2011level problem (e.g., bug, misconfiguration, bad image) rather than a node, network, storage, or security issue. The event is reported on a specific Pod, so the scope is at the pod level."
+    },
+    "evidence_collected": [],
+    "hypotheses": [
+      {
+        "hypothesis": "The container image is corrupted or built incorrectly, causing the application process to exit immediately on start\u2011up.",
+        "status": "VALID",
+        "confidence": 0.85,
+        "evidence": [
+          "Highest confidence (0.85) and a common cause of immediate container exits; despite no direct evidence, the score indicates it is plausible."
+        ]
+      },
+      {
+        "hypothesis": "Required environment variables or secret mounts are missing or malformed, leading to a runtime error during initialization.",
+        "status": "VALID",
+        "confidence": 0.78,
+        "evidence": [
+          "Confidence (0.78) exceeds the typical validation threshold and missing/incorrect env vars are frequent startup failures."
+        ]
+      },
+      {
+        "hypothesis": "A recent code change introduced a bug that crashes the application during its startup sequence.",
+        "status": "VALID",
+        "confidence": 0.72,
+        "evidence": [
+          "Confidence (0.72) is above the chosen cutoff; recent changes are a usual suspect for new crashes."
+        ]
+      },
+      {
+        "hypothesis": "The pod's resource limits (CPU/memory) are too low, causing the process to be OOM\u2011killed or throttled and restart repeatedly.",
+        "status": "INVALID",
+        "confidence": 0.65,
+        "evidence": [
+          "Confidence (0.65) is below the validation threshold and there is no evidence of OOM or throttling events."
+        ]
+      },
+      {
+        "hypothesis": "Liveness or startup probes are misconfigured, causing Kubernetes to kill the container before it can become ready.",
+        "status": "INVALID",
+        "confidence": 0.6,
+        "evidence": [
+          "Confidence (0.60) is low and no probe\u2011related failures are observed in the evidence."
+        ]
+      },
+      {
+        "hypothesis": "The application depends on an external service (e.g., database, API) that is unavailable, and it exits when it cannot establish the connection.",
+        "status": "INVALID",
+        "confidence": 0.55,
+        "evidence": [
+          "Confidence (0.55) is below threshold and no connectivity errors or service\u2011unavailable logs are present."
+        ]
+      },
+      {
+        "hypothesis": "A volume mount (ConfigMap, Secret, PersistentVolume) is missing or has incorrect permissions, causing the application to fail on start.",
+        "status": "INVALID",
+        "confidence": 0.5,
+        "evidence": [
+          "Confidence (0.50) is the lowest and there is no indication of mount or permission problems in the current evidence."
+        ]
+      }
+    ],
+    "root_cause": {
+      "root_cause": "The container image is corrupted or built incorrectly, causing the application process to exit immediately on start\u2011up.",
+      "confidence": 0.85,
+      "supporting_evidence": [
+        "Highest confidence (0.85) and a common cause of immediate container exits; despite no direct evidence, the score indicates it is plausible."
+      ]
+    },
+    "action_plan": [
+      {
+        "description": "Inspect the failing pod to see its current status, events, and container image reference.",
+        "command": "kubectl describe pod -n default <pod-name>",
+        "risk": "LOW"
+      },
+      {
+        "description": "Fetch the container logs (including previous instance) to capture any start\u2011up error messages before the process exits.",
+        "command": "kubectl logs -n default <pod-name> --previous || kubectl logs -n default <pod-name>",
+        "risk": "LOW"
+      },
+      {
+        "description": "Export the pod specification as YAML to verify the exact image name, tag, and imagePullPolicy being used.",
+        "command": "kubectl get pod -n default <pod-name> -o yaml > /tmp/<pod-name>.yaml",
+        "risk": "LOW"
+      },
+      {
+        "description": "Create a short\u2011lived test pod using the same image to see if it starts successfully in isolation.",
+        "command": "kubectl run test-image-check --image=<image-name>:<tag> --restart=Never --rm -i --tty --namespace=default -- /bin/sh -c \"echo 'Image test start'; sleep 10\"",
+        "risk": "MEDIUM"
+      },
+      {
+        "description": "If the image is confirmed corrupted, patch the owning Deployment (or other controller) to use a known good image tag or digest.",
+        "command": "kubectl set image deployment/<deployment-name> <container-name>=<good-image>:<good-tag> -n default",
+        "risk": "MEDIUM"
+      }
+    ],
+    "human_decision": {
+      "decision": "approve",
+      "comment": "Proceed"
+    },
+    "final_status": "CLOSED_WITHOUT_ACTION"
+  },
+  "human_decision": {
+    "decision": "approve",
+    "comment": "Proceed"
+  },
+  "status": "CLOSED"
+}

@@ -1,0 +1,29 @@
+{
+  "incident_id": "2aa2b0f7-59b1-4b6b-bbbb-365b72fd0cc3",
+  "cluster": "acmclus01",
+  "platform": "openshift",
+  "namespace": "default",
+  "object_ref": {
+    "kind": "Pod",
+    "name": "example-pod-v2"
+  },
+  "event": {
+    "cluster": "acmclus01",
+    "platform": "openshift",
+    "namespace": "default",
+    "object": {
+      "kind": "Pod",
+      "name": "example-pod-v2"
+    },
+    "reason": "CrashLoopBackOff",
+    "message": "Back-off restarting failed container",
+    "source": "kubelet"
+  },
+  "context": {},
+  "evidence": [],
+  "hypotheses": [],
+  "root_cause": null,
+  "action_plan": [],
+  "human_decision": null,
+  "status": "INVESTIGATING"
+}

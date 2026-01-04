@@ -1,0 +1,116 @@
+{
+  "incident_id": "34bf2a81-8aaa-4f73-bec1-b13ab5c43c66",
+  "cluster": "acmclus01",
+  "platform": "openshift",
+  "namespace": "default",
+  "object_ref": {
+    "kind": "Pod",
+    "name": "example-pod"
+  },
+  "event": {
+    "cluster": "acmclus01",
+    "platform": "openshift",
+    "namespace": "default",
+    "object": {
+      "kind": "Pod",
+      "name": "example-pod"
+    },
+    "reason": "CrashLoopBackOff",
+    "message": "Back-off restarting failed container",
+    "source": "kubelet"
+  },
+  "context": {
+    "classification": {
+      "incident_type": "application",
+      "scope": "pod",
+      "confidence": 0.96,
+      "rationale": "CrashLoopBackOff indicates the container in the pod repeatedly fails to start, a classic application-level failure rather than node, network, storage, or security issue."
+    },
+    "cluster": "acmclus01",
+    "platform": "openshift",
+    "namespace": "default",
+    "object": {
+      "kind": "Pod",
+      "name": "example-pod"
+    },
+    "investigation_stage": "context_built"
+  },
+  "evidence": [],
+  "hypotheses": [
+    {
+      "hypothesis": "The container's entrypoint script exits with a non-zero status due to a missing or malformed environment variable.",
+      "confidence": 0.28,
+      "status": "INVALID",
+      "evidence": [
+        "No evidence is provided to support a failure of the entrypoint script."
+      ]
+    },
+    {
+      "hypothesis": "The application crashes on startup because it cannot connect to an external service (e.g., database, API) that is unavailable or misconfigured.",
+      "confidence": 0.22,
+      "status": "INVALID",
+      "evidence": [
+        "No evidence indicates an external\u2011service connectivity problem."
+      ]
+    },
+    {
+      "hypothesis": "The pod exceeds its memory limit during initialization, triggering an OOM kill and immediate restart.",
+      "confidence": 0.18,
+      "status": "INVALID",
+      "evidence": [
+        "No memory\u2011usage or OOM kill evidence is present."
+      ]
+    },
+    {
+      "hypothesis": "The container image is corrupted or built incorrectly, causing a runtime exception as soon as the process starts.",
+      "confidence": 0.17,
+      "status": "INVALID",
+      "evidence": [
+        "No evidence of image corruption or build errors is supplied."
+      ]
+    },
+    {
+      "hypothesis": "A recent code change introduced a panic or unhandled exception that causes the main process to terminate immediately.",
+      "confidence": 0.15,
+      "status": "INVALID",
+      "evidence": [
+        "No evidence links a recent code change to a panic or exception."
+      ]
+    }
+  ],
+  "root_cause": {
+    "root_cause": "Insufficient data to determine root cause",
+    "confidence": 0.1,
+    "supporting_evidence": [
+      "No validated hypotheses were provided",
+      "No incident details, logs, metrics, or observations are available to analyze"
+    ]
+  },
+  "action_plan": [
+    {
+      "description": "List all pods in the default namespace to identify which workloads are currently running and their statuses.",
+      "command": "kubectl get pods -n default",
+      "risk": "LOW"
+    },
+    {
+      "description": "Describe the pods that are not in a Ready state to collect events, conditions, and recent state changes for troubleshooting.",
+      "command": "kubectl describe pod <pod-name> -n default",
+      "risk": "LOW"
+    },
+    {
+      "description": "Fetch recent logs from a specific pod (replace <pod-name> and <container-name> as needed) to gather runtime information and error messages.",
+      "command": "kubectl logs <pod-name> -c <container-name> -n default --since=1h",
+      "risk": "LOW"
+    },
+    {
+      "description": "Retrieve recent events from the default namespace to see any warnings or errors reported by the control plane.",
+      "command": "kubectl get events -n default --sort-by=.metadata.creationTimestamp",
+      "risk": "LOW"
+    }
+  ],
+  "human_decision": {
+    "decision": "approve",
+    "comment": "Proceed with recommended remediation"
+  },
+  "status": "RESUMED"
+}
